@@ -1,0 +1,20 @@
+<configuration>
+
+    <!-- Console Appender -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <!-- Optional: include MDC fields -->
+            <customFields>{"service":"loyalty-points-quote"}</customFields>
+        </encoder>
+    </appender>
+
+    <!-- Root logger -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <!-- Override for Vert.x internal logs (optional) -->
+    <logger name="io.vertx" level="INFO"/>
+    <logger name="com.example.loyalty" level="DEBUG"/>
+
+</configuration>
