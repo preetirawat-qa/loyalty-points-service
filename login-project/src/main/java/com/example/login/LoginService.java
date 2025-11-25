@@ -1,0 +1,56 @@
+package com.example.login;
+
+public class LoginService {
+
+    private final AuthRepository authRepository;
+    private final NetworkMonitor networkMonitor;
+    private final RememberMeStore rememberMeStore;
+
+    private int failedAttempts = 0;
+    private static final int LOCK_THRESHOLD = 3;
+
+    public LoginService(AuthRepository authRepository,
+                        NetworkMonitor networkMonitor,
+                        RememberMeStore rememberMeStore) {
+
+        this.authRepository = authRepository;
+        this.networkMonitor = networkMonitor;
+        this.rememberMeStore = rememberMeStore;
+    }
+
+    public LoginResult login(String username, String password, boolean rememberMe) {
+        
+    	if (username == null || username.isEmpty() ||
+    		    password == null || password.isEmpty()) {
+    		    return LoginResult.INVALID_CREDENTIALS;
+    		}
+
+    	if (failedAttempts >= LOCK_THRESHOLD) {
+            return LoginResult.LOCKED_OUT;
+        }
+
+        if (!networkMonitor.isOnline()) {
+            return LoginResult.OFFLINE;
+        }
+
+        boolean ok = authRepository.authenticate(username, password);
+
+        if (ok) {
+            failedAttempts = 0;
+            if (rememberMe) {
+                rememberMeStore.saveToken("TOKEN_ABC_123");
+            }
+            return LoginResult.SUCCESS;
+        } else {
+            failedAttempts++;
+            return LoginResult.INVALID_CREDENTIALS;
+        }
+        
+    }
+    
+
+    public int getFailedAttempts() {
+        return failedAttempts;
+    }
+    
+}
