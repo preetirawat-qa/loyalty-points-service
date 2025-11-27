@@ -5,6 +5,21 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.mockito.Mockito;
 
+/**
+ * Unit tests for {@link LoginService}.
+ * 
+ * Uses TestNG for test structure and Mockito for mocking dependencies.
+ * 
+ * Each test verifies specific authentication behaviors such as:
+ * - successful login
+ * - failed login increments counter
+ * - lockout after repeated failures
+ * - offline behavior
+ * - remember-me token storage
+ * - counter reset after success
+ * - empty credential validation
+ */
+
 public class LoginServiceTest {
 
     private AuthRepository authRepo;
@@ -19,8 +34,10 @@ public class LoginServiceTest {
         rememberMeStore = new RememberMeStore();
         service = new LoginService(authRepo, networkMonitor, rememberMeStore);
     }
-
-    @Test
+ 
+    @Test    /**
+     * Verifies that a successful authentication returns SUCCESS.
+     */
     public void testSuccessLogin() {
         Mockito.when(authRepo.authenticate("admin", "pass")).thenReturn(true);
 
@@ -29,7 +46,9 @@ public class LoginServiceTest {
         Assert.assertEquals(result, LoginResult.SUCCESS);
     }
 
-    @Test
+    @Test   /**
+     * Ensures that a failed login increments the failedAttempts counter.
+     */
     public void testFailureIncrementsCounter() {
         Mockito.when(authRepo.authenticate("a", "b")).thenReturn(false);
 
@@ -37,7 +56,10 @@ public class LoginServiceTest {
         Assert.assertEquals(service.getFailedAttempts(), 1);
     }
 
-    @Test
+    @Test   
+    /**
+     * Ensures that after three failed login attempts, the user becomes locked out.
+     */
     public void testLockoutAfterThreeFails() {
         Mockito.when(authRepo.authenticate("a", "b")).thenReturn(false);
 
@@ -50,7 +72,11 @@ public class LoginServiceTest {
         Assert.assertEquals(result, LoginResult.LOCKED_OUT);
     }
 
-    @Test
+    @Test     /**
+     * Validates that when the system is offline:
+     * - authentication is not attempted
+     * - the result is OFFLINE
+     */
     public void testOfflineShowsMessageAndNoServiceCall() {
         networkMonitor.setOnline(false);
 
@@ -60,7 +86,9 @@ public class LoginServiceTest {
         Assert.assertEquals(result, LoginResult.OFFLINE);
     }
 
-    @Test
+    @Test     /**
+     * Confirms that enabling "remember me" stores a persistent token.
+     */
     public void testRememberMeStoresToken() {
         Mockito.when(authRepo.authenticate("admin", "pass")).thenReturn(true);
 
@@ -68,7 +96,9 @@ public class LoginServiceTest {
 
         Assert.assertNotNull(rememberMeStore.getToken());
     }
-    @Test
+    @Test   /**
+     * Ensures that after a successful login, the failedAttempts counter resets to zero.
+     */
     public void testFailureCountResetsAfterSuccess() {
         Mockito.when(authRepo.authenticate("admin", "pass")).thenReturn(false);
         service.login("admin", "pass", false);
@@ -79,7 +109,11 @@ public class LoginServiceTest {
         Assert.assertEquals(service.getFailedAttempts(), 0);
     }
     
-    @Test
+    @Test   /**
+     * Ensures that empty username/password inputs:
+     * - return INVALID_CREDENTIALS
+     * - do not call the authentication repository
+     */
     public void testEmptyCredentialsValidation() {
         LoginResult result = service.login("", "", false);
         Mockito.verify(authRepo, Mockito.never()).authenticate(Mockito.any(), Mockito.any());
