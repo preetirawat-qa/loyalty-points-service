@@ -12,6 +12,17 @@ import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
+/**
+ * HTTP verticle exposing the `/v1/points/quote` endpoint.
+ *
+ * This API accepts a QuoteRequest, validates it, retrieves FX and promo info,
+ * delegates calculation to LoyaltyCalculator, and returns a QuoteResponse.
+ *
+ * Technologies:
+ * - Vert.x Web for HTTP routing
+ * - Asynchronous FX + promo calls
+ * - Graceful fallback behavior for promo failures
+ */
 public class QuoteHttpVerticle extends AbstractVerticle {
 
     private final FxClient fxClient;
@@ -45,7 +56,15 @@ public class QuoteHttpVerticle extends AbstractVerticle {
                 .onSuccess(s -> promise.complete())
                 .onFailure(promise::fail);
     }
-
+ /**
+     * Handles incoming quote requests.
+     * Steps:
+     *  1. Parse + validate JSON request payload
+     *  2. Call FX service
+     *  3. Call Promo service (with fallback behavior)
+     *  4. Pass all data to LoyaltyCalculator
+     *  5. Respond with JSON result
+     */
     private void handleQuote(RoutingContext ctx) {
         ctx.request().body().onSuccess(buffer -> {
 
@@ -92,7 +111,13 @@ public class QuoteHttpVerticle extends AbstractVerticle {
 
         }).onFailure(err -> fail(ctx, 400, "Invalid request"));
     }
-
+/**
+     * Sends an error response with the given HTTP status and message.
+     *
+     * @param ctx     routing context managing the HTTP request/response
+     * @param status  HTTP status code
+     * @param message error message to return in JSON form
+     */
     private void fail(RoutingContext ctx, int status, String message) {
         ErrorResponse error = new ErrorResponse(message);
         ctx.response()
