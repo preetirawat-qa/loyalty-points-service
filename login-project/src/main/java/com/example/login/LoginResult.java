@@ -19,7 +19,7 @@ public enum LoginResult {
 
     /**
      * The user has been locked out after too many failed attempts
-     * or due to security restrictions.
+    
      */
     LOCKED_OUT
 }
