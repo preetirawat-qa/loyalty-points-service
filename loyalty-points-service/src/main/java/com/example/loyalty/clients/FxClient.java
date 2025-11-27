@@ -5,6 +5,16 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
+/**
+ * FxClient is responsible for retrieving foreign exchange (FX) rates
+ * from an external service. It uses Vert.x WebClient for asynchronous
+ * HTTP calls and includes a built-in retry mechanism.
+ *
+ * Behavior:
+ * - Calls GET {baseUrl}/v1/fx/{currency}
+ * - Validates response format
+ * - Retries failed calls up to 3 times with increasing delay
+ */
 
 public class FxClient {
 
@@ -47,6 +57,18 @@ public class FxClient {
         return Future.succeededFuture(body.getDouble("rate"));
     }
 
+    /**
+     * Retries the FX request when possible, otherwise fails.
+     *
+     * Retry rules:
+     * - Max 3 attempts
+     * - Backoff increments: 100ms, 200ms, 300ms
+     *
+     * @param currency currency code
+     * @param attempt  current attempt number
+     * @param err      failure reason
+     * @return Future retrying or failing permanently
+     */
     private Future<Double> retryOrFail(String currency, int attempt, Throwable err) {
         if (attempt >= 3) {
             return Future.failedFuture(err);
