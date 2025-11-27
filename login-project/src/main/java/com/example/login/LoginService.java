@@ -1,5 +1,14 @@
 package com.example.login;
 
+/**
+ * LoginService coordinates user login logic, including:
+ * - validating input
+ * - checking network connectivity
+ * - handling authentication attempts
+ * - locking out the user after too many failures
+ * - supporting a simple "remember me" token mechanism
+ */
+
 public class LoginService {
 
     private final AuthRepository authRepository;
@@ -7,6 +16,8 @@ public class LoginService {
     private final RememberMeStore rememberMeStore;
 
     private int failedAttempts = 0;
+
+       // Maximum number of failed attempts before lockout
     private static final int LOCK_THRESHOLD = 3;
 
     public LoginService(AuthRepository authRepository,
