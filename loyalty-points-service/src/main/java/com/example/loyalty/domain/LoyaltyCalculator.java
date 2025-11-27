@@ -7,7 +7,17 @@ import com.example.loyalty.dto.QuoteResponse;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * LoyaltyCalculator computes loyalty points for a given flight quote.
+ *
+ * Calculation steps:
+ * 1. Converts fare amount to local currency using FX rate
+ * 2. Computes base points as floor(effective fare)
+ * 3. Adds tier bonus based on customer tier
+ * 4. Adds promo bonus if a valid promo is available
+ * 5. Caps total points at MAX_POINTS
+ * 6. Returns warnings for expiring or unavailable promos
+ */
 public class LoyaltyCalculator {
 
     private static final int MAX_POINTS = 50_000;
