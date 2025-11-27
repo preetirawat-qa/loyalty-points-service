@@ -17,9 +17,17 @@ public class LoginService {
 
     private int failedAttempts = 0;
 
-       // Maximum number of failed attempts before lockout
-    private static final int LOCK_THRESHOLD = 3;
+       
+    private static final int LOCK_THRESHOLD = 3; // Maximum number of failed attempts before lockout
 
+    
+    /**
+     * Constructs a LoginService with required dependencies.
+     *
+     * @param authRepository   Authentication provider
+     * @param networkMonitor   Checks if the system is online
+     * @param rememberMeStore  Stores persistent login tokens
+     */
     public LoginService(AuthRepository authRepository,
                         NetworkMonitor networkMonitor,
                         RememberMeStore rememberMeStore) {
@@ -31,6 +39,7 @@ public class LoginService {
 
     public LoginResult login(String username, String password, boolean rememberMe) {
         
+        // Validate that username and password are not null or empty
     	if (username == null || username.isEmpty() ||
     		    password == null || password.isEmpty()) {
     		    return LoginResult.INVALID_CREDENTIALS;
@@ -39,7 +48,7 @@ public class LoginService {
     	if (failedAttempts >= LOCK_THRESHOLD) {
             return LoginResult.LOCKED_OUT;
         }
-
+// Ensure the system is online before attempting authentication
         if (!networkMonitor.isOnline()) {
             return LoginResult.OFFLINE;
         }
