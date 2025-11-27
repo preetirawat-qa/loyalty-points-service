@@ -1,5 +1,14 @@
 package com.example.loyalty.domain;
-
+/**
+ * Tier represents customer loyalty tiers, each with an associated multiplier
+ * for calculating bonus loyalty points.
+ *
+ * Tiers:
+ * - NONE: no tier, multiplier = 0.0
+ * - SILVER: 15% bonus points
+ * - GOLD: 30% bonus points
+ * - PLATINUM: 50% bonus points
+ */
 public enum Tier {
     NONE(0.0),
     SILVER(0.15),
